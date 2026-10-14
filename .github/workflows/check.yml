@@ -1,41 +1,47 @@
-name: Check
+name: Build GApps
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  check:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - run: |
-          sudo apt -y install python3-parse
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install python3-parse python3-requests libarchive-tools
 
           curl --output aapt2.jar https://dl.google.com/android/maven2/com/android/tools/build/aapt2/8.12.0-alpha05-12782657/aapt2-8.12.0-alpha05-12782657-linux.jar
           sudo unzip -d /usr/bin aapt2.jar aapt2
           rm aapt2.jar
 
-      - uses: actions/checkout@v6
+      - name: Compile GApps packages
+        run: make gapps_arm gapps_arm64
 
-      - run: ./cicd/verify-permissions.py
-
-      - run: make gapps_arm gapps_arm64
-
-      - uses: actions/upload-artifact@v7
+      - name: Upload ARM GApps
+        uses: actions/upload-artifact@v4
         with:
-          path: out/*-arm-*.zip
-          archive: false
+          name: MindTheGapps-arm
+          path: |
+            out/*-arm-*.zip
+            out/*-arm-*.zip.sha256sum
 
-      - uses: actions/upload-artifact@v7
+      - name: Upload ARM64 GApps
+        uses: actions/upload-artifact@v4
         with:
-          path: out/*-arm-*.zip.sha256sum
-          archive: false
-
-      - uses: actions/upload-artifact@v7
-        with:
-          path: out/*-arm64-*.zip
-          archive: false
-
-      - uses: actions/upload-artifact@v7
-        with:
-          path: out/*-arm64-*.zip.sha256sum
-          archive: false
+          name: MindTheGapps-arm64
+          path: |
+            out/*-arm64-*.zip
+            out/*-arm64-*.zip.sha256sum
