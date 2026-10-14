@@ -4,19 +4,6 @@ soong_namespace {
     imports: ["vendor/gapps/common"],
 }
 
-android_app_import {
-    name: "FamilyLinkParentalControls",
-    owner: "gapps",
-    apk: "proprietary/product/priv-app/FamilyLinkParentalControls/FamilyLinkParentalControls.apk",
-    preprocessed: true,
-    presigned: true,
-    dex_preopt: {
-        enabled: false,
-    },
-    privileged: true,
-    product_specific: true,
-}
-
 genrule {
     name: "Phonesky.apk-genrule",
     out: ["Phonesky.apk"],
@@ -49,18 +36,6 @@ android_app_import {
     },
     privileged: true,
     system_ext_specific: true,
-}
-
-android_app_import {
-    name: "SpeechServicesByGoogle",
-    owner: "gapps",
-    apk: "proprietary/product/app/SpeechServicesByGoogle/SpeechServicesByGoogle.apk",
-    preprocessed: true,
-    presigned: true,
-    dex_preopt: {
-        enabled: false,
-    },
-    product_specific: true,
 }
 
 genrule {
@@ -101,18 +76,6 @@ android_app_import {
         enabled: false,
     },
     privileged: true,
-    product_specific: true,
-}
-
-android_app_import {
-    name: "talkback",
-    owner: "gapps",
-    apk: "proprietary/product/app/talkback/talkback.apk",
-    preprocessed: true,
-    presigned: true,
-    dex_preopt: {
-        enabled: false,
-    },
     product_specific: true,
 }
 

@@ -5,7 +5,6 @@ PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
 PRODUCT_PACKAGES += \
-    FamilyLinkParentalControls \
     Phonesky \
     libjni_latinimegoogle \
     com.google.android.gmssystem.prodvic
@@ -13,9 +12,7 @@ PRODUCT_PACKAGES += \
 ifeq ($(TARGET_IS_GROUPER),)
 PRODUCT_PACKAGES += \
     SetupWizard \
-    SpeechServicesByGoogle \
-    Velvet \
-    talkback
+    Velvet
 endif
 
 ifneq ($(filter %tangorpro,$(TARGET_PRODUCT)),)

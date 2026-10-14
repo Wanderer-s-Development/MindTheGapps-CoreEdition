@@ -5,13 +5,10 @@ PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
 PRODUCT_PACKAGES += \
-    AndroidAutoStub \
     GoogleCalendarSyncAdapter \
     GoogleContactsSyncAdapter \
-    GoogleFeedback \
     GooglePartnerSetup \
     GoogleServicesFramework \
-    PrebuiltExchange3Google \
     com.google.android.dialer.support \
     allowed_apex_com.google.android.gmssystem.xml \
     com.google.android.dialer.support.xml \
@@ -31,9 +28,7 @@ PRODUCT_PACKAGES += \
 
 ifeq ($(TARGET_IS_GROUPER),)
 PRODUCT_PACKAGES += \
-    GoogleRestore \
-    Wellbeing \
-    wellbeing.xml
+    GoogleRestore
 endif
 
 PRODUCT_SOONG_NAMESPACES += \
