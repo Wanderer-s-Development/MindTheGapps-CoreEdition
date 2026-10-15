@@ -1,5 +1,4 @@
 product/app/GoogleCalendarSyncAdapter/GoogleCalendarSyncAdapter.apk;PRESIGNED
-product/app/GoogleContactsSyncAdapter/GoogleContactsSyncAdapter.apk;PRESIGNED|ec9673f50e4c4dfd2bfcb784d2d8082ef48d1e23
 
 product/priv-app/GooglePartnerSetup/GooglePartnerSetup.apk;PRESIGNED
 

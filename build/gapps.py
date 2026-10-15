@@ -178,7 +178,7 @@ def build() -> None:
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        env={"LD_LIBRARY_PATH": GAPPS_BUILD_SIGN},
+        env={**os.environ, "LD_LIBRARY_PATH": str(GAPPS_BUILD_SIGN)},
         text=True,
     )
     os.remove(GAPPS_OUT_ZIP_FILENAME_UNSIGNED)

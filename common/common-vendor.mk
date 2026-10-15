@@ -6,7 +6,6 @@ PRODUCT_SOONG_NAMESPACES += \
 
 PRODUCT_PACKAGES += \
     GoogleCalendarSyncAdapter \
-    GoogleContactsSyncAdapter \
     GooglePartnerSetup \
     GoogleServicesFramework \
     com.google.android.dialer.support \

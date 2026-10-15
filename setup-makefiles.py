@@ -103,7 +103,7 @@ class android_app_import(SoongPrebuilt):
             "name": self.name,
             "owner": "gapps",
             "apk": self.src,
-            "overrides": [self._flag("OVERRIDES")],
+            "overrides": self._flag("OVERRIDES").split(",") if self._has_flag("OVERRIDES") else [],
             "preprocessed": True,
             "presigned": True,
             "dex_preopt": {

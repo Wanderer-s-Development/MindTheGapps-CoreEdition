@@ -5,7 +5,10 @@ PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
 PRODUCT_PACKAGES += \
+    GoogleContacts \
+    GoogleDialer \
     Phonesky \
+    PrebuiltBugle \
     libjni_latinimegoogle \
     com.google.android.gmssystem.prodvic
 
