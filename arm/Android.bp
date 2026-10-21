@@ -31,22 +31,9 @@ android_app_import {
     system_ext_specific: true,
 }
 
-genrule {
-    name: "Velvet.apk-genrule",
-    out: ["Velvet.apk"],
-    cmd: "cat $(in) > $(out)",
-    srcs: ["proprietary/product/priv-app/Velvet/Velvet.apk.00", "proprietary/product/priv-app/Velvet/Velvet.apk.01", "proprietary/product/priv-app/Velvet/Velvet.apk.02"],
-}
 
-android_app_import {
-    name: "Velvet",
-    owner: "gapps",
-    apk: ":Velvet.apk-genrule",
-    preprocessed: true,
-    presigned: true,
-    dex_preopt: {
-        enabled: false,
-    },
+
+,
     privileged: true,
     product_specific: true,
 }

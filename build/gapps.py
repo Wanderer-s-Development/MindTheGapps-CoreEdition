@@ -4,17 +4,15 @@ from pathlib import Path
 import glob
 import hashlib
 import os
+import re
 import shutil
 import subprocess
 import sys
 import zipfile
 
 ANDROIDV, SDKV = ("17.0.0", 37)
-GARCH = sys.argv[1]
-CPUARCH = sys.argv[2] if len(sys.argv) > 2 else GARCH
 
 GAPPS_TOP = Path(__file__).resolve().parents[1]
-
 GAPPS_BUILD = GAPPS_TOP / "build"
 GAPPS_BUILD_APKTOOL = GAPPS_BUILD / "apktool" / "apktool_3.0.2.jar"
 GAPPS_BUILD_META = GAPPS_BUILD / "meta"
@@ -24,22 +22,9 @@ GAPPS_BUILD_SIGN_SIGNAPK = GAPPS_BUILD_SIGN / "signapk.jar"
 GAPPS_BUILD_SIGN_TESTKEY = GAPPS_BUILD_SIGN / "testkey"
 
 GAPPS_OUT = GAPPS_TOP / "out"
-GAPPS_OUT_GARCH = GAPPS_OUT / GARCH
-GAPPS_OUT_GARCH_METAINF = GAPPS_OUT_GARCH / "META-INF"
-GAPPS_OUT_GARCH_SYSTEM = GAPPS_OUT_GARCH / "system"
-GAPPS_OUT_GARCH_SYSTEM_ADDOND = GAPPS_OUT_GARCH_SYSTEM / "addon.d"
-GAPPS_OUT_ZIP_BASENAME = (
-    GAPPS_OUT
-    / f"MindTheGapps-{ANDROIDV}-{GARCH}-{datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")}"
-)
-GAPPS_OUT_ZIP_BASENAME_UNSIGNED = Path(f"{GAPPS_OUT_ZIP_BASENAME}-unsigned")
-GAPPS_OUT_ZIP_FILENAME = Path(f"{GAPPS_OUT_ZIP_BASENAME}.zip")
-GAPPS_OUT_ZIP_FILENAME_UNSIGNED = Path(f"{GAPPS_OUT_ZIP_BASENAME_UNSIGNED}.zip")
-
 GAPPS_OVERLAY = GAPPS_TOP / "overlay"
 
 PROPRIETARY_COMMON = GAPPS_TOP / "common" / "proprietary"
-PROPRIETARY_GARCH = GAPPS_TOP / GARCH / "proprietary"
 
 
 def run_command(*args, **kwargs) -> subprocess.CompletedProcess:
@@ -55,23 +40,51 @@ def run_command(*args, **kwargs) -> subprocess.CompletedProcess:
     return ret
 
 
-def build() -> None:
-    # Build overlays
+def build_package(garch: str, cpuarch: str, variant: str, timestamp: str) -> Path:
+    """
+    Builds a specific variant: 'core' or 'telephony'.
+    Outputs zip as:
+      MindTheGapps-{ANDROIDV}-{garch}-Core-{timestamp}.zip
+      MindTheGapps-{ANDROIDV}-{garch}-Telephony-{timestamp}.zip
+    """
+    variant = variant.lower()
+    variant_title = "Core" if variant == "core" else "Telephony"
+    
+    print(f"\n========================================================")
+    print(f"Building MindTheGapps {variant_title} for {garch} ({cpuarch})")
+    print(f"========================================================")
+
+    out_dir = GAPPS_OUT / f"{garch}_{variant}"
+    out_system = out_dir / "system"
+    out_metainf = out_dir / "META-INF"
+    out_addond = out_system / "addon.d"
+
+    zip_basename = GAPPS_OUT / f"MindTheGapps-{ANDROIDV}-{garch}-{variant_title}-{timestamp}"
+    zip_basename_unsigned = Path(f"{zip_basename}-unsigned")
+    zip_filename = Path(f"{zip_basename}.zip")
+    zip_filename_unsigned = Path(f"{zip_basename_unsigned}.zip")
+
+    # Clean working directory
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_system.mkdir(parents=True, exist_ok=True)
+
+    # 1. Build overlays
     for overlay in GAPPS_OVERLAY.iterdir():
         if not overlay.is_dir():
             continue
 
+        partition = "product"
         with open(overlay / "Android.bp") as f:
             for line in f.readlines():
                 if line.endswith("_specific: true\n"):
                     partition, _ = line.strip().split("_specific: true")
 
-        overlay_target_dir = GAPPS_OUT_GARCH_SYSTEM / partition / "overlay"
+        overlay_target_dir = out_system / partition / "overlay"
         overlay_target_dir.mkdir(parents=True, exist_ok=True)
-
         overlay_target = overlay_target_dir / f"{overlay.name}.apk"
 
-        # Compile overlay resources
         run_command(
             [
                 "java",
@@ -86,7 +99,6 @@ def build() -> None:
             text=True,
         )
 
-        # Create overlay apk manually to avoid funny issues
         with zipfile.ZipFile(overlay_target, "w") as z:
             for src, filename, compress_type in [
                 (
@@ -102,11 +114,9 @@ def build() -> None:
             ]:
                 info = zipfile.ZipInfo(filename, (2009, 1, 1, 0, 0, 0))
                 info.compress_type = compress_type
-
                 with open(src, "rb") as f:
                     z.writestr(info, f.read())
 
-        # Sign overlay apk
         run_command(
             [
                 "java",
@@ -124,46 +134,137 @@ def build() -> None:
             stderr=subprocess.PIPE,
             text=True,
         )
-        os.remove(f"{overlay_target}.idsig")
+        if os.path.exists(f"{overlay_target}.idsig"):
+            os.remove(f"{overlay_target}.idsig")
 
-    # Copy addon.d scripts
-    GAPPS_OUT_GARCH_SYSTEM_ADDOND.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(GAPPS_TOP / "addond_head", GAPPS_OUT_GARCH_SYSTEM_ADDOND)
-    shutil.copy2(GAPPS_TOP / "addond_tail", GAPPS_OUT_GARCH_SYSTEM_ADDOND)
+    # 2. Copy addon.d scripts
+    out_addond.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(GAPPS_TOP / "addond_head", out_addond)
 
-    # Copy META-INF
-    shutil.copytree(GAPPS_BUILD_META, GAPPS_OUT_GARCH_METAINF, dirs_exist_ok=True)
+    if variant == "core":
+        # In Core edition, do NOT remove stock Dialer, Messaging, or Contacts!
+        core_addond_tail = """EOF
+}
 
-    # Copy prebuilts
-    shutil.copytree(PROPRIETARY_COMMON, GAPPS_OUT_GARCH_SYSTEM, dirs_exist_ok=True)
-    shutil.copytree(PROPRIETARY_GARCH, GAPPS_OUT_GARCH_SYSTEM, dirs_exist_ok=True)
+case "$1" in
+  backup)
+    list_files | while read FILE DUMMY; do
+      backup_file $S/$FILE
+    done
+  ;;
+  restore)
+    list_files | while read FILE REPLACEMENT; do
+      R=""
+      [ -n "$REPLACEMENT" ] && R="$S/$REPLACEMENT"
+      [ -f "$C/$S/$FILE" ] && restore_file $S/$FILE $R
+    done
+  ;;
+  pre-backup)
+    # Stub
+  ;;
+  post-backup)
+    # Stub
+  ;;
+  pre-restore)
+    # Stub
+  ;;
+  post-restore)
+    if [ -e "$S/system_ext/priv-app/SetupWizard" ] || [ -e "$S/priv-app/SetupWizard" ]; then
+      rm -rf "$S/system_ext/priv-app/Provision"
+      rm -rf "$S/priv-app/Provision"
+    fi
+    for i in $(list_files); do
+      f=$(get_output_path "$S/$i")
+      chown root:root $f
+      chmod 644 $f
+      chmod 755 $(dirname $f)
+    done
+  ;;
+esac
+"""
+        with open(out_addond / "addond_tail", "w") as f:
+            f.write(core_addond_tail)
+    else:
+        # Telephony edition retains stock app removal
+        shutil.copy2(GAPPS_TOP / "addond_tail", out_addond)
 
-    # Merge split prebuilts
+    # 3. Copy META-INF and customize update-binary
+    shutil.copytree(GAPPS_BUILD_META, out_metainf, dirs_exist_ok=True)
+    update_binary_path = out_metainf / "com" / "google" / "android" / "update-binary"
+    if update_binary_path.exists():
+        with open(update_binary_path, "r") as f:
+            ub_content = f.read()
+
+        if variant == "core":
+            # Remove stock app deletion block from update-binary in Core
+            ub_content = re.sub(
+                r'ui_print "Removing overridden stock apps"[\s\S]*?done',
+                '# Stock apps kept in Core edition',
+                ub_content
+            )
+            with open(update_binary_path, "w") as f:
+                f.write(ub_content)
+
+    # 4. Copy prebuilts
+    proprietary_garch = GAPPS_TOP / garch / "proprietary"
+    shutil.copytree(PROPRIETARY_COMMON, out_system, dirs_exist_ok=True)
+    if proprietary_garch.exists():
+        shutil.copytree(proprietary_garch, out_system, dirs_exist_ok=True)
+
+    # 5. Velvet Removal Safeguard (ensure Velvet never makes it into either edition)
+    for velvet_target in [
+        out_system / "product" / "priv-app" / "Velvet",
+        out_system / "product" / "priv-app" / "VelvetTitan",
+    ]:
+        if velvet_target.exists():
+            shutil.rmtree(velvet_target)
+
+    # 6. Apply variant differences
+    if variant == "core":
+        print("Configuring Core Edition (removing telephony packages: Dialer, Bugle, Contacts)...")
+        telephony_items = [
+            out_system / "product" / "priv-app" / "GoogleDialer",
+            out_system / "product" / "priv-app" / "PrebuiltBugle",
+            out_system / "product" / "app" / "GoogleContacts",
+            out_system / "product" / "framework" / "com.google.android.dialer.support.jar",
+            out_system / "product" / "etc" / "permissions" / "com.google.android.dialer.support.xml",
+        ]
+        for item in telephony_items:
+            if item.is_dir():
+                shutil.rmtree(item)
+            elif item.is_file():
+                item.unlink()
+    else:
+        print("Configuring Telephony Edition (includes Dialer, Bugle, and Contacts)...")
+
+    # 7. Merge split prebuilts
     for first_chunk in glob.glob(
-        "**/*.00", root_dir=GAPPS_OUT_GARCH_SYSTEM, recursive=True
+        "**/*.00", root_dir=out_system, recursive=True
     ):
-        merged_path = Path(GAPPS_OUT_GARCH_SYSTEM / first_chunk).with_suffix("")
-
+        merged_path = Path(out_system / first_chunk).with_suffix("")
         with open(merged_path, "wb+") as f:
             for chunk in sorted(glob.glob(f"{merged_path}.*")):
                 with open(chunk, "rb") as c:
                     shutil.copyfileobj(c, f)
-
                 os.remove(chunk)
 
-    # Copy toybox
-    shutil.copy2(GAPPS_TOP / f"toybox-{GARCH}", GAPPS_OUT_GARCH / "toybox")
+    # 8. Copy toybox
+    toybox_src = GAPPS_TOP / f"toybox-{garch}"
+    if toybox_src.exists():
+        shutil.copy2(toybox_src, out_dir / "toybox")
 
-    # Create build.prop
-    with open(GAPPS_OUT_GARCH / "build.prop", "wt+") as f:
-        f.write(f"arch={CPUARCH}\n")
+    # 9. Create build.prop
+    with open(out_dir / "build.prop", "wt+") as f:
+        f.write(f"arch={cpuarch}\n")
         f.write(f"version={SDKV}\n")
         f.write(f"version_nice={ANDROIDV}\n")
+        f.write(f"variant={variant}\n")
 
-    # Package
-    shutil.make_archive(GAPPS_OUT_ZIP_BASENAME_UNSIGNED, "zip", GAPPS_OUT_GARCH)
+    # 10. Package archive
+    GAPPS_OUT.mkdir(parents=True, exist_ok=True)
+    shutil.make_archive(zip_basename_unsigned, "zip", out_dir)
 
-    # Sign
+    # 11. Sign archive
     run_command(
         [
             "java",
@@ -173,28 +274,54 @@ def build() -> None:
             "-w",
             f"{GAPPS_BUILD_SIGN_TESTKEY}.x509.pem",
             f"{GAPPS_BUILD_SIGN_TESTKEY}.pk8",
-            GAPPS_OUT_ZIP_FILENAME_UNSIGNED,
-            GAPPS_OUT_ZIP_FILENAME,
+            zip_filename_unsigned,
+            zip_filename,
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env={**os.environ, "LD_LIBRARY_PATH": str(GAPPS_BUILD_SIGN)},
         text=True,
     )
-    os.remove(GAPPS_OUT_ZIP_FILENAME_UNSIGNED)
+    if zip_filename_unsigned.exists():
+        os.remove(zip_filename_unsigned)
 
-    # Generate sha256 file
-    with open(GAPPS_OUT / f"{GAPPS_OUT_ZIP_FILENAME}.sha256sum", "wt+") as f:
-        f.write(
-            hashlib.file_digest(
-                open(GAPPS_OUT_ZIP_FILENAME, "rb"), "sha256"
-            ).hexdigest()
-        )
-        f.write(f"  {GAPPS_OUT_ZIP_FILENAME.name}\n")
+    # 12. Generate sha256 checksum file
+    sha256_path = GAPPS_OUT / f"{zip_filename.name}.sha256sum"
+    with open(sha256_path, "wt+") as f:
+        digest = hashlib.file_digest(open(zip_filename, "rb"), "sha256").hexdigest()
+        f.write(f"{digest}  {zip_filename.name}\n")
 
-    # Clean up
-    shutil.rmtree(GAPPS_OUT_GARCH)
+    print(f"Generated: {zip_filename.name} (SHA-256: {digest[:16]}...)")
+
+    # 13. Clean working build directory
+    shutil.rmtree(out_dir)
+
+    return zip_filename
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: gapps.py <arm|arm64> [cpuarch] [core|telephony|both]")
+        sys.exit(1)
+
+    garch = sys.argv[1]
+    cpuarch = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] not in ("core", "telephony", "both", "all") else garch
+    
+    # Determine variant target
+    variant = "both"
+    if len(sys.argv) > 2 and sys.argv[2] in ("core", "telephony", "both", "all"):
+        variant = sys.argv[2]
+    elif len(sys.argv) > 3:
+        variant = sys.argv[3]
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+
+    if variant in ("core", "both", "all"):
+        build_package(garch, cpuarch, "core", timestamp)
+
+    if variant in ("telephony", "both", "all"):
+        build_package(garch, cpuarch, "telephony", timestamp)
 
 
 if __name__ == "__main__":
-    build()
+    main()

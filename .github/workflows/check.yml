@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - cinnamonbun
-  pull_request:
-    branches:
-      - cinnamonbun
   workflow_dispatch:
     inputs:
       arch:
@@ -29,10 +26,12 @@ permissions:
 
 jobs:
   build:
+    name: Build Core & Telephony Packages
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -40,17 +39,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install dependencies
+      - name: Install Build Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get -y install python3-parse python3-requests libarchive-tools
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3-parse python3-requests libarchive-tools
 
           curl -sSL --output aapt2.jar https://dl.google.com/android/maven2/com/android/tools/build/aapt2/8.12.0-alpha05-12782657/aapt2-8.12.0-alpha05-12782657-linux.jar
           sudo unzip -d /usr/bin aapt2.jar aapt2
           sudo chmod +x /usr/bin/aapt2
           rm -f aapt2.jar
 
-      - name: Compile GApps packages
+      - name: Compile GApps (Core & Telephony)
         run: |
           TARGET="${{ inputs.arch }}"
           if [ -z "$TARGET" ] || [ "$TARGET" = "both" ]; then
@@ -61,13 +60,16 @@ jobs:
             make gapps_arm64
           fi
 
+          echo "=== Generated Packages ==="
+          ls -lh out/
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: MindTheGapps-packages
           path: |
             out/*.zip
-            out/*.zip.sha256sum
+            out/*.sha256sum
 
       - name: Publish GitHub Release
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
@@ -75,33 +77,46 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME="MindTheGapps-17.0.0-$(date -u +'%Y%m%d_%H%M%S')"
-          RELEASE_TITLE="MindTheGapps Minimal 17.0.0 ($(date -u +'%Y-%m-%d'))"
+          RELEASE_TITLE="MindTheGapps 17.0.0 Core & Telephony ($(date -u +'%Y-%m-%d'))"
 
           cat << 'EOF' > /tmp/release_notes.md
-          ## MindTheGapps Minimal (Android 17 / API 37)
+          ## MindTheGapps (Android 17 / API 37)
 
-          Personal build of MindTheGapps featuring official Google Pixel telephony apps extracted from Google's official Pixel 8 OTA.
-
-          ### Included Components:
-          - **Google Play Services** (APEX mainline container `com.google.android.gmssystem.prodvic.apex`)
-          - **Google Play Store** (`Phonesky`)
-          - **Google Setup Wizard** (`SetupWizard` in `system_ext`)
-          - **Google Dialer** (`GoogleDialer` with In-Call UI and Call Recording)
-          - **Google Messages** (`PrebuiltBugle` with native Jibe RCS support)
-          - **Google Contacts** (`GoogleContacts`)
-          - **Cloud Restore & Account Transfer** (`GoogleRestore`, `GooglePartnerSetup`)
-
-          ### De-bloated / Removed:
-          - Removed `SpeechServicesByGoogle` (TTS), `GoogleFeedback`, `TalkBack`, `FamilyLink`, `Wellbeing`, `PrebuiltExchange3Google`, and `AndroidAutoStub`.
-          - Automated recovery cleanup of stock AOSP Dialer, Messages, and Contacts upon flashing.
+          Automated build containing two distinct editions published under this release:
 
           ---
-          *Note: This is a personal project build for Android 17 / VoltageOS.*
+
+          ### 📦 1. Core Package (`...-Core-...zip`)
+          Minimal clean Google experience without replacing stock ROM communication apps:
+          * **Google Play Services** (APEX mainline container `com.google.android.gmssystem.prodvic.apex`)
+          * **Google Play Store** (`Phonesky`)
+          * **Google Services Framework** (`GoogleServicesFramework`)
+          * **Google Setup Wizard** (`SetupWizard` in `system_ext`)
+          * **Google Calendar Sync Adapter** (`GoogleCalendarSyncAdapter`)
+          * **Google Contacts Sync Adapter** (`GoogleContactsSyncAdapter`)
+          * **Account Transfer & Cloud Restore** (`GoogleRestore`, `GooglePartnerSetup`)
+          * 🛡️ **Stock AOSP Dialer, Messaging, and Contacts remain intact.**
+
+          ---
+
+          ### 📞 2. Telephony Package (`...-Telephony-...zip`)
+          Everything in Core plus official Google Pixel telephony suite:
+          * **All components from Core Package above**
+          * **Google Phone / Dialer** (`GoogleDialer` with In-Call UI & Call Recording support)
+          * **Google Messages** (`PrebuiltBugle` with native Jibe RCS support)
+          * **Google Contacts** (`GoogleContacts` full app)
+          * 🔄 **Automated recovery cleanup of stock AOSP Dialer, Messaging, and Contacts.**
+
+          ---
+
+          ### 🚫 De-bloated / Excluded from Both Editions:
+          * ❌ `Velvet` / `VelvetTitan` (Google Search App) completely stripped.
+          * ❌ `SpeechServicesByGoogle` (TTS), `GoogleFeedback`, `TalkBack`, `FamilyLink`, `Wellbeing`, `AndroidAutoStub`.
           EOF
 
-          echo "Publishing release $TAG_NAME..."
+          echo "Publishing release $TAG_NAME with all Core and Telephony assets..."
           gh release create "$TAG_NAME" \
             out/*.zip \
-            out/*.zip.sha256sum \
+            out/*.sha256sum \
             --title "$RELEASE_TITLE" \
             --notes-file /tmp/release_notes.md
