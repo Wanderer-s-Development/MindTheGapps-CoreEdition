@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.mtg.gmssetupwizardoverlay">
     <application android:hasCode="false" />
-    <overlay android:targetPackage="org.lineageos.setupwizard"
+    <overlay android:targetPackage="com.google.android.setupwizard"
              android:isStatic="true"
              android:priority="1337" />
 </manifest>
