@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Flag indicating whether round icons should be parsed from the application manifest. -->
+    <bool name="config_useRoundIcon">true</bool>
+
+    <!-- Set this to true to enable the platform's auto-power-save modes like doze and app standby. -->
+    <bool name="config_enableAutoPowerModes">true</bool>
+
+    <!-- Whether this device is supporting the software microphone toggle -->
+    <bool name="config_supportsMicToggle">true</bool>
+
+    <!-- Whether this device is supporting the camera toggle -->
+    <bool name="config_supportsCamToggle">true</bool>
+
+    <!-- Whether the primary location time zone provider is enabled. -->
+    <bool name="config_enablePrimaryLocationTimeZoneProvider">true</bool>
+</resources>

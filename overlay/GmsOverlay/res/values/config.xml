@@ -3,6 +3,45 @@
     <!-- The package name of the default SetupWizard -->
     <string name="config_setupWizardPackage" translatable="false">com.google.android.setupwizard</string>
 
+    <!-- Package name for the device provisioning package. -->
+    <string name="config_deviceProvisioningPackage" translatable="false">com.google.android.apps.work.oobconfig</string>
+
+    <!-- Package name(s) containing location provider support. -->
+    <string-array name="config_locationProviderPackageNames" translatable="false">
+        <item>com.google.android.gms</item>
+        <item>com.android.location.fused</item>
+    </string-array>
+
+    <!-- Package name(s) containing extra location support. -->
+    <string-array name="config_locationExtraPackageNames" translatable="false">
+        <item>com.google.android.gms.location.history</item>
+    </string-array>
+
+    <!-- A list of potential packages that may contain an ephemeral resolver. -->
+    <string-array name="config_ephemeralResolverPackage" translatable="false">
+        <item>com.google.android.gms</item>
+    </string-array>
+
+    <!-- Package providing metadata for Google Play system updates. -->
+    <string name="config_defaultModuleMetadataProvider" translatable="false">com.google.android.modulemetadata</string>
+
+    <!-- The package hosting the primary location time zone provider. -->
+    <string name="config_primaryLocationTimeZoneProviderPackageName" translatable="false">com.google.android.gms</string>
+
+    <!-- The package name of the default network recommendation app. -->
+    <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false">com.google.android.gms</string>
+
+    <!-- The package name of the allowlist provider service -->
+    <string name="config_allowlistProviderServicePackage" translatable="false">com.google.android.gms</string>
+
+    <!-- Packages exempt from suspension. -->
+    <string-array name="config_packagesExemptFromSuspension" translatable="false">
+        <item>com.android.vending</item>
+        <item>com.google.android.gms</item>
+        <item>com.android.systemui</item>
+        <item>com.android.settings</item>
+    </string-array>
+
     <!-- The set of system packages on device that are queryable by any app regardless of the
          contents of its manifest. -->
     <string-array name="config_forceQueryablePackages" translatable="false">

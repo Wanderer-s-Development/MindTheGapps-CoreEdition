@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- List of packages that should be allowlisted for slice uri access. Do not translate -->
+    <string-array name="slice_allowlist_package_names" translatable="false">
+        <item>com.google.android.gms</item>
+        <item>com.google.android.googlequicksearchbox</item>
+    </string-array>
+
     <!-- BT Slice intent action. To support Settings 2 panel, BT slice can't use PendingIntent.send(). Therefore, here defines the Slice intent action. -->
     <string name="config_bt_slice_intent_action" translatable="false">com.google.android.gms.nearby.discovery.ACTION_LOG_SLICE_AND_LAUNCH_INTENT</string>
 

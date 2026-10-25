@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Material You / Monet and Expressive Design Flags -->
     <bool name="dynamic_color_enabled">true</bool>
     <bool name="full_dynamic_color_enabled">true</bool>
     <bool name="extended_partner_config_enabled">true</bool>
     <bool name="enable_partner_experiment">true</bool>
     <bool name="glif_expressive_enabled">true</bool>
     <bool name="allow_override_dynamic_color_in_glif_expressive">true</bool>
+    <bool name="is_material_you_style_enabled">true</bool>
+    <bool name="material_you_style_enabled">true</bool>
+    <bool name="suw_day_night_enabled">true</bool>
+    <bool name="is_neutral_button_style_enabled">true</bool>
+    <bool name="neutral_button_style_enabled">true</bool>
+    <bool name="is_font_weight_enabled">true</bool>
+    <bool name="font_weight_enabled">true</bool>
+    <bool name="loading_layout_full_screen_illustration_enabled">false</bool>
     <bool name="enable_quick_enhanced_biometrics_flow">true</bool>
 </resources>
