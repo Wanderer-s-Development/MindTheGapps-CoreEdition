@@ -1,0 +1,89 @@
+name: Weekly Upstream Check
+
+on:
+  schedule:
+    # Runs every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-upstream:
+    name: Check for Upstream MindTheGapps Updates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch Upstream MindTheGapps
+        run: |
+          git remote add upstream_repo https://github.com/MindTheGapps/vendor_gapps.git
+          git fetch upstream_repo cinnamonbun
+
+      - name: Compare with Upstream
+        id: compare
+        run: |
+          BEHIND=$(git rev-list --count HEAD..upstream_repo/cinnamonbun)
+          echo "behind_count=$BEHIND" >> "$GITHUB_OUTPUT"
+          
+          if [ "$BEHIND" -gt 0 ]; then
+            echo "Upstream is ahead by $BEHIND commit(s)."
+            COMMITS=$(git log HEAD..upstream_repo/cinnamonbun --pretty=format:"* %h - %s (%an, %ad)" --date=short)
+            echo "$COMMITS"
+            
+            # Save commit list for issue creation
+            cat << 'EOF' > /tmp/upstream_commits.txt
+          ### 🚀 New Upstream Commits Available
+          
+          Upstream [`MindTheGapps/vendor_gapps`](https://github.com/MindTheGapps/vendor_gapps) has new changes on `cinnamonbun`:
+          
+          EOF
+            echo "$COMMITS" >> /tmp/upstream_commits.txt
+            cat << 'EOF' >> /tmp/upstream_commits.txt
+          
+          ---
+          
+          ### 🛠️ How to Sync & Maintain Debloat:
+          ```bash
+          git pull upstream cinnamonbun
+          # Refer to REMOVED_APPS.md if any bloat was reintroduced
+          git push origin cinnamonbun
+          ```
+          EOF
+          else
+            echo "Repository is completely up to date with upstream MindTheGapps."
+          fi
+
+      - name: Notify via GitHub Issue if Behind
+        if: steps.compare.outputs.behind_count > 0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if an open notification issue already exists to avoid duplicate spam
+          EXISTING_ISSUE=$(gh issue list --search "Upstream MindTheGapps Update in:title state:open" --json number -q '.[0].number')
+          
+          if [ -z "$EXISTING_ISSUE" ]; then
+            gh issue create \
+              --title "🔔 Upstream MindTheGapps Update: ${{ steps.compare.outputs.behind_count }} new commit(s)" \
+              --body-file /tmp/upstream_commits.txt \
+              --label "enhancement"
+          else
+            echo "Issue #$EXISTING_ISSUE is already open. Adding comment with latest update..."
+            gh issue comment "$EXISTING_ISSUE" --body-file /tmp/upstream_commits.txt
+          fi
+
+      - name: Log Step Summary
+        run: |
+          if [ "${{ steps.compare.outputs.behind_count }}" -gt 0 ]; then
+            echo "### ⚠️ Upstream has ${{ steps.compare.outputs.behind_count }} new commit(s)" >> $GITHUB_STEP_SUMMARY
+            cat /tmp/upstream_commits.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ Up to Date" >> $GITHUB_STEP_SUMMARY
+            echo "MindTheGapps-CoreEdition is completely synchronized with upstream." >> $GITHUB_STEP_SUMMARY
+          fi
