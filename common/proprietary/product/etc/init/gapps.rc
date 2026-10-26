@@ -1,3 +1,7 @@
 on init
     setprop ro.com.google.gmsversion 17_202606
     setprop ro.opa.eligible_device true
+    setprop setupwizard.theme glif_expressive
+    setprop setupwizard.feature.day_night_mode_enabled true
+    setprop setupwizard.feature.enhanced_setup_design_metrics true
+    setprop setupwizard.feature.enable_quick_start_flow true

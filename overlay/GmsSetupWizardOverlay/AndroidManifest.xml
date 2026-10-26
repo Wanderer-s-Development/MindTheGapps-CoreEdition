@@ -3,6 +3,5 @@
           package="com.mtg.gmssetupwizardoverlay">
     <application android:hasCode="false" />
     <overlay android:targetPackage="com.google.android.setupwizard"
-             android:isStatic="true"
              android:priority="1337" />
 </manifest>

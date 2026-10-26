@@ -3,9 +3,6 @@
     <!-- The package name of the default SetupWizard -->
     <string name="config_setupWizardPackage" translatable="false">com.google.android.setupwizard</string>
 
-    <!-- Package name for the device provisioning package. -->
-    <string name="config_deviceProvisioningPackage" translatable="false">com.google.android.apps.work.oobconfig</string>
-
     <!-- Package name(s) containing location provider support. -->
     <string-array name="config_locationProviderPackageNames" translatable="false">
         <item>com.google.android.gms</item>
