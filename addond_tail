@@ -36,14 +36,12 @@ case "$1" in
       /product/etc/sysconfig/com.android.messaging.allowlist.xml \
       /product/etc/permissions/com.android.contacts.xml \
       /system_ext/priv-app/Provision \
-      /system_ext/priv-app/LineageSetupWizard \
       /system/priv-app/Dialer \
       /system/app/messaging \
       /system/app/Mms \
       /system/app/Contacts \
       /system/priv-app/Contacts \
-      /system/priv-app/Provision \
-      /system/priv-app/LineageSetupWizard; do
+      /system/priv-app/Provision; do
       rm -rf "$target"
     done
     for i in $(list_files); do

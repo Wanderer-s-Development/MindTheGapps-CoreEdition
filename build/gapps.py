@@ -173,9 +173,6 @@ case "$1" in
       rm -rf "$S/system_ext/priv-app/Provision"
       rm -rf "$S/priv-app/Provision"
       rm -rf "/system_ext/priv-app/Provision"
-      rm -rf "$S/system_ext/priv-app/LineageSetupWizard"
-      rm -rf "$S/priv-app/LineageSetupWizard"
-      rm -rf "/system_ext/priv-app/LineageSetupWizard"
     fi
     for i in $(list_files); do
       f=$(get_output_path "$S/$i")
