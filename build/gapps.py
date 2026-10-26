@@ -169,9 +169,13 @@ case "$1" in
     # Stub
   ;;
   post-restore)
-    if [ -e "$S/system_ext/priv-app/SetupWizard" ] || [ -e "$S/priv-app/SetupWizard" ]; then
+    if [ -e "$S/system_ext/priv-app/SetupWizard" ] || [ -e "$S/priv-app/SetupWizard" ] || [ -e "/system_ext/priv-app/SetupWizard" ]; then
       rm -rf "$S/system_ext/priv-app/Provision"
       rm -rf "$S/priv-app/Provision"
+      rm -rf "/system_ext/priv-app/Provision"
+      rm -rf "$S/system_ext/priv-app/LineageSetupWizard"
+      rm -rf "$S/priv-app/LineageSetupWizard"
+      rm -rf "/system_ext/priv-app/LineageSetupWizard"
     fi
     for i in $(list_files); do
       f=$(get_output_path "$S/$i")

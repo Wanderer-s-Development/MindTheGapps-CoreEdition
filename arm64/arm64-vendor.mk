@@ -2,7 +2,7 @@
 #
 
 PRODUCT_SOONG_NAMESPACES += \
-    $(LOCAL_PATH)
+    vendor/gapps/arm64
 
 PRODUCT_PACKAGES += \
     Phonesky \

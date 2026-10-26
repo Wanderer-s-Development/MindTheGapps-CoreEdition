@@ -320,7 +320,7 @@ def generate(targets: list[GappsTarget]) -> None:
                 f.write("\n")
 
             f.write("\n")
-            write_list("PRODUCT_SOONG_NAMESPACES", [f"$(LOCAL_PATH)"])
+            write_list("PRODUCT_SOONG_NAMESPACES", [f"vendor/gapps/{target.name}"])
 
             if packages:
                 f.write("\n")
@@ -369,7 +369,7 @@ if __name__ == "__main__":
             ),
             GappsTarget(
                 name="arm",
-                soong_imports=["vendor/gapps/common"],
+                soong_imports=["vendor/gapps/common", "vendor/gapps/dummy-apps"],
                 additional_namespaces=[],
                 additional_packages=[],
                 additional_makefiles_to_inherit=[
@@ -378,7 +378,7 @@ if __name__ == "__main__":
             ),
             GappsTarget(
                 name="arm64",
-                soong_imports=["vendor/gapps/common"],
+                soong_imports=["vendor/gapps/common", "vendor/gapps/dummy-apps"],
                 additional_namespaces=[],
                 additional_packages=[],
                 additional_makefiles_to_inherit=[

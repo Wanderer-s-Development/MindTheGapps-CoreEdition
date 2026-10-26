@@ -141,6 +141,7 @@ It allows additional grants on top of privapp-permissions-platform.xml
         <permission name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.PACKAGE_VERIFICATION_AGENT"/>
+        <permission name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.READ_RUNTIME_PROFILES"/>
         <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
@@ -264,6 +265,22 @@ It allows additional grants on top of privapp-permissions-platform.xml
     </privapp-permissions>
 
     <privapp-permissions package="com.google.android.gms">
+        <permission name="android.permission.ACCESS_CELL_BROADCAST"/>
+        <permission name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE"/>
+        <permission name="android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION"/>
+        <permission name="android.permission.CAPTURE_SECURE_VIDEO_OUTPUT"/>
+        <permission name="android.permission.CAPTURE_VIDEO_OUTPUT"/>
+        <permission name="android.permission.DRAW_MOTION_CUES"/>
+        <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
+        <permission name="android.permission.PACKET_KEEPALIVE_OFFLOAD"/>
+        <permission name="android.permission.PERFORM_GESTURE_EXCHANGE"/>
+        <permission name="android.permission.RANGING"/>
+        <permission name="android.permission.READ_NEARBY_STREAMING_POLICY"/>
+        <permission name="android.permission.REGISTER_CALL_PROVIDER"/>
+        <permission name="android.permission.USE_FULL_SCREEN_INTENT"/>
+        <permission name="android.permission.USE_ICC_AUTH"/>
+        <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
         <permission name="android.permission.ACCESS_BROADCAST_RESPONSE_STATS"/>
         <permission name="android.permission.ACCESS_CACHE_FILESYSTEM"/>
         <permission name="android.permission.ACCESS_CONTEXT_HUB"/>

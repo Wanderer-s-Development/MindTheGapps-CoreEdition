@@ -1,7 +1,7 @@
 // Automatically generated file. DO NOT MODIFY
 
 soong_namespace {
-    imports: ["vendor/gapps/common"],
+    imports: ["vendor/gapps/common", "vendor/gapps/dummy-apps"],
 }
 
 genrule {
@@ -28,6 +28,7 @@ android_app_import {
     name: "SetupWizard",
     owner: "gapps",
     apk: "proprietary/system_ext/priv-app/SetupWizard/SetupWizard.apk",
+    overrides: ["Provision", "LineageSetupWizard"],
     preprocessed: true,
     presigned: true,
     dex_preopt: {

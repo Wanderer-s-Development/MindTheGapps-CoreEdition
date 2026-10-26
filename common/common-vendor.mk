@@ -2,7 +2,7 @@
 #
 
 PRODUCT_SOONG_NAMESPACES += \
-    $(LOCAL_PATH)
+    vendor/gapps/common
 
 PRODUCT_PACKAGES += \
     GoogleCalendarSyncAdapter \
