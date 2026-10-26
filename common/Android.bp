@@ -66,25 +66,10 @@ android_app_import {
     system_ext_specific: true,
 }
 
-dex_import {
-    name: "com.google.android.dialer.support",
-    owner: "gapps",
-    jars: ["proprietary/product/framework/com.google.android.dialer.support.jar"],
-    product_specific: true,
-}
-
 prebuilt_etc {
     name: "allowed_apex_com.google.android.gmssystem.xml",
     src: "proprietary/product/etc/sysconfig/allowed_apex_com.google.android.gmssystem.xml",
     relative_install_path: "sysconfig",
-    filename_from_src: true,
-    product_specific: true,
-}
-
-prebuilt_etc {
-    name: "com.google.android.dialer.support.xml",
-    src: "proprietary/product/etc/permissions/com.google.android.dialer.support.xml",
-    relative_install_path: "permissions",
     filename_from_src: true,
     product_specific: true,
 }

@@ -6,11 +6,10 @@ PRODUCT_SOONG_NAMESPACES += \
 
 PRODUCT_PACKAGES += \
     GoogleCalendarSyncAdapter \
+    GoogleContactsSyncAdapter \
     GooglePartnerSetup \
     GoogleServicesFramework \
-    com.google.android.dialer.support \
     allowed_apex_com.google.android.gmssystem.xml \
-    com.google.android.dialer.support.xml \
     d2d_cable_migration_feature.xml \
     default-permissions-google.xml \
     gms_fsverity_cert.der \

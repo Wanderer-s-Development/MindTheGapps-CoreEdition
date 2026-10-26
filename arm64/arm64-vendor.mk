@@ -5,20 +5,9 @@ PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH)
 
 PRODUCT_PACKAGES += \
-    GoogleContacts \
-    GoogleDialer \
     Phonesky \
-    PrebuiltBugle \
+    SetupWizard \
     libjni_latinimegoogle \
     com.google.android.gmssystem.prodvic
-
-ifeq ($(TARGET_IS_GROUPER),)
-PRODUCT_PACKAGES += \
-    SetupWizard \
-endif
-
-ifneq ($(filter %tangorpro,$(TARGET_PRODUCT)),)
-PRODUCT_PACKAGES += \
-endif
 
 $(call inherit-product, vendor/gapps/common/common-vendor.mk)

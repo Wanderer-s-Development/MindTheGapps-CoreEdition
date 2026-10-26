@@ -4,33 +4,6 @@ soong_namespace {
     imports: ["vendor/gapps/common"],
 }
 
-android_app_import {
-    name: "GoogleContacts",
-    owner: "gapps",
-    apk: "proprietary/product/app/GoogleContacts/GoogleContacts.apk",
-    overrides: ["Contacts"],
-    preprocessed: true,
-    presigned: true,
-    dex_preopt: {
-        enabled: false,
-    },
-    product_specific: true,
-}
-
-android_app_import {
-    name: "GoogleDialer",
-    owner: "gapps",
-    apk: "proprietary/product/priv-app/GoogleDialer/GoogleDialer.apk",
-    overrides: ["Dialer"],
-    preprocessed: true,
-    presigned: true,
-    dex_preopt: {
-        enabled: false,
-    },
-    privileged: true,
-    product_specific: true,
-}
-
 genrule {
     name: "Phonesky.apk-genrule",
     out: ["Phonesky.apk"],
@@ -51,32 +24,10 @@ android_app_import {
     product_specific: true,
 }
 
-genrule {
-    name: "PrebuiltBugle.apk-genrule",
-    out: ["PrebuiltBugle.apk"],
-    cmd: "cat $(in) > $(out)",
-    srcs: ["proprietary/product/priv-app/PrebuiltBugle/PrebuiltBugle.apk.00", "proprietary/product/priv-app/PrebuiltBugle/PrebuiltBugle.apk.01"],
-}
-
-android_app_import {
-    name: "PrebuiltBugle",
-    owner: "gapps",
-    apk: ":PrebuiltBugle.apk-genrule",
-    overrides: ["Mms", "messaging"],
-    preprocessed: true,
-    presigned: true,
-    dex_preopt: {
-        enabled: false,
-    },
-    privileged: true,
-    product_specific: true,
-}
-
 android_app_import {
     name: "SetupWizard",
     owner: "gapps",
     apk: "proprietary/system_ext/priv-app/SetupWizard/SetupWizard.apk",
-    overrides: ["Provision"],
     preprocessed: true,
     presigned: true,
     dex_preopt: {
@@ -84,20 +35,6 @@ android_app_import {
     },
     privileged: true,
     system_ext_specific: true,
-}
-
-
-
-,
-    privileged: true,
-    product_specific: true,
-}
-
-
-
-,
-    privileged: true,
-    product_specific: true,
 }
 
 cc_prebuilt_library_shared {
