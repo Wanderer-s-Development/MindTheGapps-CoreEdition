@@ -25,24 +25,29 @@ case "$1" in
   ;;
   post-restore)
     for target in \
-      /product/priv-app/Dialer \
-      /product/app/messaging \
-      /product/app/Mms \
-      /product/priv-app/Mms \
-      /product/priv-app/Contacts \
-      /product/app/Contacts \
-      /product/etc/permissions/com.android.dialer.xml \
-      /product/etc/permissions/privapp_whitelist_com.android.dialer-ext.xml \
-      /product/etc/sysconfig/com.android.messaging.allowlist.xml \
-      /product/etc/permissions/com.android.contacts.xml \
-      /system_ext/priv-app/Provision \
-      /system/priv-app/Dialer \
-      /system/app/messaging \
-      /system/app/Mms \
-      /system/app/Contacts \
-      /system/priv-app/Contacts \
-      /system/priv-app/Provision; do
-      rm -rf "$target"
+      product/priv-app/Dialer \
+      product/app/messaging \
+      product/app/Mms \
+      product/priv-app/Mms \
+      product/priv-app/Contacts \
+      product/app/Contacts \
+      product/etc/permissions/com.android.dialer.xml \
+      product/etc/permissions/privapp_whitelist_com.android.dialer-ext.xml \
+      product/etc/sysconfig/com.android.messaging.allowlist.xml \
+      product/etc/permissions/com.android.contacts.xml \
+      system_ext/priv-app/Provision \
+      system/priv-app/Dialer \
+      system/app/messaging \
+      system/app/Mms \
+      system/app/Contacts \
+      system/priv-app/Contacts \
+      system/priv-app/Provision; do
+      rm -rf "$(get_output_path "$target")" 2>/dev/null
+      rm -rf "$(get_output_path "$S/$target")" 2>/dev/null
+      rm -rf "/postinstall/$target" 2>/dev/null
+      rm -rf "/postinstall/system/$target" 2>/dev/null
+      rm -rf "/$target" 2>/dev/null
+      rm -rf "$S/$target" 2>/dev/null
     done
     for i in $(list_files); do
       f=$(get_output_path "$S/$i")
